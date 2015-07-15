@@ -1,11 +1,12 @@
 #!/usr/bin/python
 from __future__ import print_function
-from util import check_valid_url, get_url
 import sys
 try:
     from urllib import quote
 except ImportError:
     from urllib.parse import quote
+
+from util import check_valid_url, get_url
 
 
 def generate_script(header_dict, details_dict, searchString=None):
@@ -15,7 +16,7 @@ def generate_script(header_dict, details_dict, searchString=None):
     :param dict details_dict: Request specific details like body and method for the request.
     :param str searchString: String to search for in the response to the request. By default remains None.
 
-    :return: Empty
+    :return: None
     """
     method = details_dict['method'].strip()
     url = get_url(header_dict['Host'])
@@ -42,16 +43,17 @@ uri = URI('%s')""" % (url)
 
     if method == "GET":
         skeleton_code += """
-req = Net::HTTP::Get.new(uri.request_uri)\n%s %s %s """ % (generate_request_headers(header_dict), is_proxy(details_dict), is_https(url)) + """
-response = http.request(req)
-"""
+req = Net::HTTP::Get.new(uri.request_uri)
+%s %s %s
+response = http.request(req)""" % (generate_request_headers(header_dict), is_proxy(details_dict), is_https(url))
     elif method == "POST":
         body = details_dict['data']
         skeleton_code += """
-req = Net::HTTP::Post.new(uri.request_uri)\n%s """ % (generate_request_headers(header_dict)) + """
-req.body = %s\n %s %s""" % (str(body), is_proxy(details_dict), is_https(url)) + """
+req = Net::HTTP::Post.new(uri.request_uri)
+%s
+req.body = %s\n %s %s
 response = http.request(req)
-"""
+""" % (generate_request_headers(header_dict), str(body), is_proxy(details_dict), is_https(url))
 
     if searchString:
         skeleton_code += """
@@ -64,7 +66,7 @@ rescue LoadError
     puts "You can install it by gem install colorize"
 end
 
-matched = response.body.match /%s/""" % (searchString) + """
+matched = response.body.match /%s/
 
 original = response.body
 if matched then
@@ -73,7 +75,7 @@ if matched then
     end
 end
 puts original
-"""
+""" % (searchString)
     else:
         skeleton_code += """
 puts "Response #{response.code} #{response.message}:
@@ -83,7 +85,7 @@ puts "Response #{response.code} #{response.message}:
 
 
 def generate_request_headers(header_dict):
-    """ Place the request headers in ruby script from header dictionary
+    """Place the request headers in ruby script from header dictionary.
 
         :param dict header_dict: Header dictionary containing fields like 'Host','User-Agent'.
 
@@ -98,7 +100,7 @@ def generate_request_headers(header_dict):
 
 
 def is_https(url):
-    """Checks if url is 'https' and returns appropriate ruby code
+    """Checks if url is 'https' and returns appropriate ruby code.
 
         :param str url: Url for the request
 
@@ -112,7 +114,7 @@ def is_https(url):
 
 
 def is_proxy(details_dict):
-    """Checks if proxy is provided and returns appropriate ruby code
+    """Checks if proxy is provided and returns appropriate ruby code.
 
         :param dict details_dict: Dictionary of request details containing proxy specific information.
 
@@ -120,11 +122,11 @@ def is_proxy(details_dict):
         :rtype:`str`
     """
     if 'proxy' in details_dict:
-        proxy = details_dict['proxy'].split(':')
+        proxy_host, proxy_port = details_dict['proxy'].split(':')
         return """
-proxy_host, proxy_port = '%s', '%s'""" % (proxy[0].strip(), proxy[1].strip()) + """'
+proxy_host, proxy_port = '%s', '%s'
 http = Net::HTTP.new(uri.hostname, nil, proxy_host, proxy_port)
-"""
+""" % (proxy_host.strip(), proxy_port.strip())
     else:
         return """
 http = Net::HTTP.new(uri.hostname, uri.port)
