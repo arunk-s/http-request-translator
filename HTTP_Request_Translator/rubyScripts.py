@@ -87,10 +87,10 @@ puts "Response #{response.code} #{response.message}:
 def generate_request_headers(header_dict):
     """Place the request headers in ruby script from header dictionary.
 
-        :param dict header_dict: Header dictionary containing fields like 'Host','User-Agent'.
+    :param dict header_dict: Header dictionary containing fields like 'Host','User-Agent'.
 
-        :return: A string of ruby code which places headers in the request.
-        :rtype:`str`
+    :return: A string of ruby code which places headers in the request.
+    :rtype:`str`
     """
     skeleton = ""
     for key, value in header_dict.items():
@@ -102,10 +102,10 @@ def generate_request_headers(header_dict):
 def is_https(url):
     """Checks if url is 'https' and returns appropriate ruby code.
 
-        :param str url: Url for the request
+    :param str url: Url for the request
 
-        :return: A string of ruby code
-        :rtype:`str`
+    :return: A string of ruby code
+    :rtype:`str`
     """
     if url.startswith('https'):
         return "\nhttp.use_ssl=true"
@@ -116,10 +116,10 @@ def is_https(url):
 def is_proxy(details_dict):
     """Checks if proxy is provided and returns appropriate ruby code.
 
-        :param dict details_dict: Dictionary of request details containing proxy specific information.
+    :param dict details_dict: Dictionary of request details containing proxy specific information.
 
-        :return: A string of ruby code
-        :rtype:`str`
+    :return: A string of ruby code
+    :rtype:`str`
     """
     if 'proxy' in details_dict:
         proxy_host, proxy_port = details_dict['proxy'].split(':')
