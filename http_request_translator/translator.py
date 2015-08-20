@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import sys
+import re
 try:
     input = raw_input  # Python 2.x
 except NameError:
@@ -36,8 +37,17 @@ def process_arguments(args):
             print("\nThanks for using the interactive mode! Exiting!")
             sys.exit(0)
     else:
+        if args.transform_boundary and args.transform_language:
+            transform_language = args.transform_language
+            transform_boundary = args.transform_boundary
+            transform_present = True
+        elif args.transform_boundary or args.transform_language:
+            print("Please enter 'transform_boundary' and 'transform_language' both as they are both required.")
+            sys.exit(-1)
+        else:
+            transform_present = False
         if args.request:
-            headers, details = parse_raw_request(args.request)
+            raw_request = args.request
         elif args.file:
             fp = open(args.file)
             raw_request = ""
@@ -45,10 +55,29 @@ def process_arguments(args):
                 if line != '':
                     raw_request += line
             raw_request = raw_request.rstrip('\r\n')  # Remove any linefeeds if present in the file provided
-            headers, details = parse_raw_request(raw_request)
         else:
             print("Input a raw HTTP Request and try again.\nElse try using the interactive option")
             sys.exit(-1)
+        if transform_present:
+            # Pass transform Name
+            if args.transform_name:
+                transform_name = args.transform_name
+            else:
+                transform_name = "urlencode"  # Maybe a default value for transform_name
+            #  look for the line with tranform boundaries
+            match = re.search(r'%s%s\w+(\s+\w+)*%s' % (
+                transform_name, transform_boundary, transform_boundary),
+                raw_request)
+            if match:
+                print(match.group())
+                # TODO: May be switch over transform_name to generate appropriate substitution,
+                #  currently going with only example availble
+                raw_request = re.sub(match.group(), "$PARAM1", raw_request)
+            else:
+                print("Warning!! No match for transform")
+            headers, details = parse_raw_request(raw_request, transform_present, transform_language)
+        else:
+            headers, details = parse_raw_request(raw_request)
         if args.data:
             details['data'] = args.data
         else:
@@ -137,10 +166,12 @@ def take_body(headers, script_list):
     return body
 
 
-def parse_raw_request(request):
+def parse_raw_request(request, transform_present=False, transform_language=None):
     """Parses Raw HTTP request into separate dictionaries for headers and body and other parameters.
 
     :param str request: Raw HTTP request.
+    :param bool transform_present: If transform variables are present in the provided request.
+    :param str transform_language: Name of the language in which transform needs to be done.
 
     :raises ValueError: When request passed in malformed.
 
@@ -195,4 +226,7 @@ def parse_raw_request(request):
         details_dict['pre_scheme'] = scheme + "://"  # Store the scheme defined in GET path for later checks
     else:
         details_dict['pre_scheme'] = ''
+    if transform_present:
+        # Place apropriate tranform template in the script depending on this key
+        details_dict['transform_language'] = transform_language
     return header_list, details_dict

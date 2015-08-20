@@ -15,6 +15,7 @@ def take_arguments():
                     "raw HTTP requests into curl commands or bash/python/php/ruby/PowerShell scripts")
     conflicting_group = parser.add_mutually_exclusive_group()
     request_group = parser.add_mutually_exclusive_group()
+    tranform_group = parser.add_argument_group()
     parser.add_argument(
         '--output', '-o',
         action='append',
@@ -45,6 +46,16 @@ def take_arguments():
     request_group.add_argument(
         '--file', '-f',
         help='Input file for HTTP request')
+    tranform_group.add_argument(
+        '--transform_boundary', '-tb',
+        help="Pattern to recognise the start and end of the code that needs to be transformed.")
+    tranform_group.add_argument(
+        '--transform_language', '-tl',
+        choices=['bash', 'php'],  # Currently focussing on only these two.
+        help="Language to be used while tranforming the provided request.")
+    tranform_group.add_argument(
+        '--transform_name', '-tn',
+        help="Intended action/name for the given transform.")
 
     process_arguments(parser.parse_args())
     return parser.parse_args()
