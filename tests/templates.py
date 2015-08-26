@@ -293,6 +293,7 @@ req.run
 """
 code_begin_bash = """
 #!/usr/bin/env bash
+
 curl"""
 
 
@@ -301,11 +302,13 @@ code_search_bash = """ | egrep --color " hello3131\\"you\\\\"are'awesome |$" """
 
 code_bash = """
 #!/usr/bin/env bash
+
 curl -x http://xyz.com:2223 -v --request GET https://google.com/robots.txt  --header "Host: google.com"  --include"""
 
 
 code_post_bash = """
 #!/usr/bin/env bash
+
 curl --data "extra=whoAreYou"  -v --request POST https://www.codepunker.com/tools/http-requests  --header "Host: www.codepunker.com"  --include"""
 
 code_begin_php = """

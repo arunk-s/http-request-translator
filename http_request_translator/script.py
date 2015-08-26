@@ -19,6 +19,18 @@ class BashScript(AbstractScript):
     code_post = bash_template.code_post
     code_search = bash_template.code_search
     code_nosearch = bash_template.code_nosearch
+    code_transform = bash_template.code_transform
+
+    def _generate_begin(self):
+        """Overrides the generation of the default beginning of the code.
+
+        :return: Beginning of the code for bash script.
+        :rtype: str
+        """
+        if self.details.get('transform_name', ''):
+            return self.code_begin.format(transform=self._generate_transform())
+        else:
+            return self.code_begin.format(transform='')
 
     def _generate_request(self):
         code = self.code_nosearch.format(

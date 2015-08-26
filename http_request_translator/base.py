@@ -23,6 +23,7 @@ class AbstractScript(object):
     code_https = ''
     code_search = ''
     code_nosearch = ''
+    code_transform = ''
 
     def __init__(self, headers=None, details=None, search=None):
         """Initialize the script generation.
@@ -184,3 +185,15 @@ class AbstractScript(object):
         if self.details.get('data') and (self.details.get('method', '').lower() in http_verb_with_encoding):
             encoded_url += quote(self.details['data'], '')
         return encoded_url
+
+    def _generate_transform(self):
+        """Generate Transform code for the request if the option is enabled.
+
+        :return str transform_code: Code snippet having the transform setup.
+        :rtype: str
+        """
+        if self.details.get('transform_name', ''):
+            return self.code_transform.format(transform_name=self.details.get('transform_name', ''),
+                transform_content=self.details.get('transform_content', ''))
+        else:
+            return ''

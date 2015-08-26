@@ -62,28 +62,33 @@ def process_arguments(args):
         if transform_present:
             # Pass transform Name
             # find the transform boundary,it expects smth like : @@@@urlencode(abc d)@@@@
-            match = re.search(r'%s\w+\(([A-Za-z\s])*\)%s' % (
+            match = re.search(r'%s[\w_]+\(([A-Za-z\s_])*\)%s' % (
                 transform_boundary, transform_boundary),
                 raw_request)
             if match:
-                transform = match.group()
+                transform_string = match.group()  # Original matched string
+                transform_content = transform_string.split(transform_boundary)[1]  # String without transform boundary
                 transform_list = ['urlencode', 'json_encode', 'base64_encode', 'urldecode', 'json_decode',
                     'base64_decode']
                 # Parse transform Name
                 try:
-                    transform_name = transform.split('(')[0]
-                    transform_name = transform_name.split('%s' % (transform_boundary))[1]
+                    transform_name = transform_content.split('(')[0]
                 except IndexError:
-                    raise ValueError("Tranform Malformed!")
+                    raise ValueError("Transform Malformed!")
                 if transform_name in transform_list:
-                    # call tranform dispatcher
-                    raw_request = transform_dispatcher(transform_name, transform, raw_request)
+                    # call transform dispatcher(Maybe not)
+                    raw_request = raw_request.replace(transform_string, "$PARAM1")
+                    # Separate the input values provide to the transform function
+                    transform_content = transform_content.replace(transform_name, '')
+                    transform_content = transform_content.replace('(', '')
+                    transform_content = transform_content.replace(')', '')
                 else:
                     print('Transform not supported yet!')
                     sys.exit(-1)
             else:
                 raise ValueError("Warning!! No match for transform")
-            headers, details = parse_raw_request(raw_request, transform_present, transform_language)
+            headers, details = parse_raw_request(raw_request, transform_present,
+                transform_language, transform_name, transform_content)
         else:
             headers, details = parse_raw_request(raw_request)
         if args.data:
@@ -120,17 +125,6 @@ def process_arguments(args):
                 print(generated_code)
 
     return argdict
-
-
-def transform_dispatcher(transform_name, transform, raw_request):
-    """TODO: Docstring
-    """
-    if transform_name == "urlencode":
-        return raw_request.replace(transform, "$PARAM1")
-    # Further more transform names
-    else:
-        print("Tranform not supported, yet")
-        sys.exit(-1)
 
 
 def take_headers(script_list):
@@ -185,7 +179,7 @@ def take_body(headers, script_list):
     return body
 
 
-def parse_raw_request(request, transform_present=False, transform_language=None):
+def parse_raw_request(request, transform_present=False, transform_lang=None, transform_name=None, transform_content=None):
     """Parses Raw HTTP request into separate dictionaries for headers and body and other parameters.
 
     :param str request: Raw HTTP request.
@@ -246,6 +240,8 @@ def parse_raw_request(request, transform_present=False, transform_language=None)
     else:
         details_dict['pre_scheme'] = ''
     if transform_present:
-        # Place apropriate tranform template in the script depending on this key
-        details_dict['transform_language'] = transform_language
+        # Place apropriate transform template in the script depending on this key
+        details_dict['transform_lang'] = transform_lang
+        details_dict['transform_name'] = transform_name
+        details_dict['transform_content'] = transform_content
     return header_list, details_dict
