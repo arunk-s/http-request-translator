@@ -192,8 +192,8 @@ class AbstractScript(object):
         :return str transform_code: Code snippet having the transform setup.
         :rtype: str
         """
-        if self.details.get('transform_name', ''):
-            return self.code_transform.format(transform_name=self.details.get('transform_name', ''),
-                transform_content=self.details.get('transform_content', ''))
+        if 'transform_name' in self.details and 'transform_content' in self.details:
+            return self.code_transform.format(transform_name=self.details['transform_name'],
+                transform_content=self.details['transform_content'])
         else:
             return ''

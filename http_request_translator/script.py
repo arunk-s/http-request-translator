@@ -27,7 +27,7 @@ class BashScript(AbstractScript):
         :return: Beginning of the code for bash script.
         :rtype: str
         """
-        if self.details.get('transform_name', ''):
+        if 'transform_name' in self.details:
             return self.code_begin.format(transform=self._generate_transform())
         else:
             return self.code_begin.format(transform='')
