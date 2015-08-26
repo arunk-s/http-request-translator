@@ -49,32 +49,40 @@ def process_arguments(args):
         if args.request:
             raw_request = args.request
         elif args.file:
-            fp = open(args.file)
-            raw_request = ""
-            for line in fp.readlines():
-                if line != '':
-                    raw_request += line
-            raw_request = raw_request.rstrip('\r\n')  # Remove any linefeeds if present in the file provided
+            try:
+                with open(args.file, 'r') as f:
+                    raw_request = ''.join(line for line in f.readlines() if line).rstrip('\r\n')
+            except IOError:
+                raise IOError("No such file or directory: %s" % (args.file))
+            except OSError:
+                raise OSError("Permission to read the file is not granted!")
         else:
             print("Input a raw HTTP Request and try again.\nElse try using the interactive option")
             sys.exit(-1)
         if transform_present:
             # Pass transform Name
-            if args.transform_name:
-                transform_name = args.transform_name
-            else:
-                transform_name = "urlencode"  # Maybe a default value for transform_name
-            #  look for the line with tranform boundaries
-            match = re.search(r'%s%s\w+(\s+\w+)*%s' % (
-                transform_name, transform_boundary, transform_boundary),
+            # find the transform boundary,it expects smth like : @@@@urlencode(abc d)@@@@
+            match = re.search(r'%s\w+\(([A-Za-z\s])*\)%s' % (
+                transform_boundary, transform_boundary),
                 raw_request)
             if match:
-                print(match.group())
-                # TODO: May be switch over transform_name to generate appropriate substitution,
-                #  currently going with only example availble
-                raw_request = re.sub(match.group(), "$PARAM1", raw_request)
+                transform = match.group()
+                transform_list = ['urlencode', 'json_encode', 'base64_encode', 'urldecode', 'json_decode',
+                    'base64_decode']
+                # Parse transform Name
+                try:
+                    transform_name = transform.split('(')[0]
+                    transform_name = transform_name.split('%s' % (transform_boundary))[1]
+                except IndexError:
+                    raise ValueError("Tranform Malformed!")
+                if transform_name in transform_list:
+                    # call tranform dispatcher
+                    raw_request = transform_dispatcher(transform_name, transform, raw_request)
+                else:
+                    print('Transform not supported yet!')
+                    sys.exit(-1)
             else:
-                print("Warning!! No match for transform")
+                raise ValueError("Warning!! No match for transform")
             headers, details = parse_raw_request(raw_request, transform_present, transform_language)
         else:
             headers, details = parse_raw_request(raw_request)
@@ -112,6 +120,17 @@ def process_arguments(args):
                 print(generated_code)
 
     return argdict
+
+
+def transform_dispatcher(transform_name, transform, raw_request):
+    """TODO: Docstring
+    """
+    if transform_name == "urlencode":
+        return raw_request.replace(transform, "$PARAM1")
+    # Further more transform names
+    else:
+        print("Tranform not supported, yet")
+        sys.exit(-1)
 
 
 def take_headers(script_list):
