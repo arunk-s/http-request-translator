@@ -4,6 +4,7 @@ if (!extension_loaded('curl')) {{
     exit;
 }}
 $ch = curl_init();
+{transform}
 curl_setopt($ch, CURLOPT_URL, '{url}');
 // Set so curl_exec returns the result instead of outputting it.
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -11,6 +12,8 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 curl_setopt($ch, CURLOPT_VERBOSE, 1);
 $headers = array();
 """
+
+code_transform = """transform={transform_name}('{transform_content}');"""
 
 
 code_header = """

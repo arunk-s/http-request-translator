@@ -11,6 +11,7 @@ except ImportError:
 def main():
     buffer = BytesIO()
     curl_handler = pycurl.Curl()
+
     curl_handler.setopt(curl_handler.URL, 'https://google.com/robots.txt')
     curl_handler.setopt(curl_handler.WRITEDATA, buffer)
     curl_handler.setopt(curl_handler.HTTPHEADER, ['Host: google.com'])
@@ -71,6 +72,7 @@ except ImportError:
 def main():
     buffer = BytesIO()
     curl_handler = pycurl.Curl()
+
     curl_handler.setopt(curl_handler.URL, 'https://google.com/robots.txt')
     curl_handler.setopt(curl_handler.WRITEDATA, buffer)
     curl_handler.setopt(curl_handler.HTTPHEADER, ['Host: google.com'])
@@ -120,6 +122,7 @@ except ImportError:
 def main():
     buffer = BytesIO()
     curl_handler = pycurl.Curl()
+
     curl_handler.setopt(curl_handler.URL, 'https://www.codepunker.com/tools/http-requests')
     curl_handler.setopt(curl_handler.WRITEDATA, buffer)
     curl_handler.setopt(curl_handler.HTTPHEADER, ['Host: www.codepunker.com'])
@@ -317,6 +320,7 @@ if (!extension_loaded('curl')) {
     exit;
 }
 $ch = curl_init();
+
 curl_setopt($ch, CURLOPT_URL, 'https://google.com/robots.txt');
 // Set so curl_exec returns the result instead of outputting it.
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -360,6 +364,7 @@ if (!extension_loaded('curl')) {
     exit;
 }
 $ch = curl_init();
+
 curl_setopt($ch, CURLOPT_URL, 'https://google.com/robots.txt');
 // Set so curl_exec returns the result instead of outputting it.
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -389,6 +394,7 @@ if (!extension_loaded('curl')) {
     exit;
 }
 $ch = curl_init();
+
 curl_setopt($ch, CURLOPT_URL, 'https://www.codepunker.com/tools/http-requests');
 // Set so curl_exec returns the result instead of outputting it.
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);

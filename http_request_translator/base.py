@@ -192,8 +192,27 @@ class AbstractScript(object):
         :return str transform_code: Code snippet having the transform setup.
         :rtype: str
         """
-        if 'transform_name' in self.details and 'transform_content' in self.details:
-            return self.code_transform.format(transform_name=self.details['transform_name'],
-                transform_content=self.details['transform_content'])
+        if 'transform' in self.details:
+            return self.code_transform.format(transform_name=self.details['transform'].get('transform_name', ''),
+                transform_content=self.details['transform'].get('transform_content', ''))
         else:
             return ''
+
+    def _apply_transform(self, var=None):
+        """Apply transform code in the script and split the url into appropriate variables.
+
+        :param str var: Variable name to be use to divide the url into
+
+        :return str transform_url: Splitted url which appends appropriate transform variable
+        :rtype: `str`
+        """
+        if 'transform' in self.details:
+            md5 = self.details['transform'].get('md5', '')
+            if var:
+                self.url = self.url.replace(md5, var)
+            splits = self.url.split(var)
+            if len(splits) == 2:
+                transform_url = splits[0] + "' + " + var + " + '" + splits[1]
+            else:
+                transform_url = splits[0] + "' + " + var
+            return transform_url

@@ -1,6 +1,6 @@
 code_begin = """
 require "typhoeus"
-
+{transform}
 url = '{url}'
 
 options = {{
@@ -8,6 +8,8 @@ options = {{
     verbose: true,
     method: :{method},
 """
+
+code_transform = """transform={transform_name}('{transform_content}')"""
 
 
 code_proxy = """

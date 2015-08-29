@@ -11,6 +11,7 @@ except ImportError:
 def main():
     buffer = BytesIO()
     curl_handler = pycurl.Curl()
+{transform}
     curl_handler.setopt(curl_handler.URL, '{url}')
     curl_handler.setopt(curl_handler.WRITEDATA, buffer)
     curl_handler.setopt(curl_handler.HTTPHEADER, {headers})
@@ -21,6 +22,14 @@ def main():
     # For older PycURL versions:
     #curl_handler.setopt(curl_handler.WRITEFUNCTION, buffer.write)
 """
+
+
+code_transform = """
+    try:
+        from urllib import urlencode
+    except ImportError:
+        from urllib.parse import urlencode
+    transform={transform_name}('{transform_content}')"""
 
 
 code_proxy = """

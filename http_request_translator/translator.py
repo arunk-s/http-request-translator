@@ -10,6 +10,7 @@ try:
     from urlparse import urlparse
 except ImportError:
     from urllib.parse import urlparse
+import hashlib
 
 from .plugin_manager import generate_script
 from .url import get_url, check_valid_url
@@ -38,7 +39,7 @@ def process_arguments(args):
             sys.exit(0)
     else:
         if args.transform_boundary and args.transform_language:
-            transform_language = args.transform_language
+            transform_lang = args.transform_language
             transform_boundary = args.transform_boundary
             transform_present = True
         elif args.transform_boundary or args.transform_language:
@@ -60,6 +61,7 @@ def process_arguments(args):
             print("Input a raw HTTP Request and try again.\nElse try using the interactive option")
             sys.exit(-1)
         if transform_present:
+            pass
             # Pass transform Name
             # find the transform boundary,it expects smth like : @@@@urlencode(abc d)@@@@
             match = re.search(r'%s[\w_]+\(([A-Za-z\s_])*\)%s' % (
@@ -67,6 +69,7 @@ def process_arguments(args):
                 raw_request)
             if match:
                 transform_string = match.group()  # Original matched string
+                transform_md5 = hashlib.md5(transform_string).hexdigest()
                 transform_content = transform_string.split(transform_boundary)[1]  # String without transform boundary
                 transform_list = ['urlencode', 'json_encode', 'base64_encode', 'urldecode', 'json_decode',
                     'base64_decode']
@@ -76,19 +79,22 @@ def process_arguments(args):
                 except IndexError:
                     raise ValueError("Transform Malformed!")
                 if transform_name in transform_list:
-                    # call transform dispatcher(Maybe not)
-                    raw_request = raw_request.replace(transform_string, "$PARAM1")
+                    raw_request = raw_request.replace(transform_string, transform_md5)
                     # Separate the input values provide to the transform function
                     transform_content = transform_content.replace(transform_name, '')
                     transform_content = transform_content.replace('(', '')
                     transform_content = transform_content.replace(')', '')
+                    transform_dict = {}
+                    transform_dict['transform_content'] = transform_content
+                    transform_dict['transform_name'] = transform_name
+                    transform_dict['transform_lang'] = transform_lang
+                    transform_dict['md5'] = transform_md5
                 else:
                     print('Transform not supported yet!')
                     sys.exit(-1)
             else:
                 raise ValueError("Warning!! No match for transform")
-            headers, details = parse_raw_request(raw_request, transform_present,
-                transform_language, transform_name, transform_content)
+            headers, details = parse_raw_request(raw_request, transform_present, transform_dict)
         else:
             headers, details = parse_raw_request(raw_request)
         if args.data:
@@ -179,17 +185,17 @@ def take_body(headers, script_list):
     return body
 
 
-def parse_raw_request(request, transform_present=False, transform_lang=None, transform_name=None, transform_content=None):
+def parse_raw_request(request, transform_present=False, transform_dict=None):
     """Parses Raw HTTP request into separate dictionaries for headers and body and other parameters.
 
     :param str request: Raw HTTP request.
     :param bool transform_present: If transform variables are present in the provided request.
-    :param str transform_language: Name of the language in which transform needs to be done.
+    :param str transform_dict: Dictionary having all transform specific information.
 
     :raises ValueError: When request passed in malformed.
 
     :return: Separate dictionaries for headers and body and other parameters.
-    :rtype: dict,dict
+    :rtype: `dict`, `dict`
     """
     try:
         new_request_method, headers = request.split('\n', 1)
@@ -241,7 +247,5 @@ def parse_raw_request(request, transform_present=False, transform_lang=None, tra
         details_dict['pre_scheme'] = ''
     if transform_present:
         # Place apropriate transform template in the script depending on this key
-        details_dict['transform_lang'] = transform_lang
-        details_dict['transform_name'] = transform_name
-        details_dict['transform_content'] = transform_content
+        details_dict['transform'] = transform_dict
     return header_list, details_dict
