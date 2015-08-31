@@ -51,7 +51,7 @@ def take_arguments():
         help="Pattern to recognise the start and end of the code that needs to be transformed.")
     tranform_group.add_argument(
         '--transform_language', '-tl',
-        choices=['bash', 'php'],  # Currently focussing on only these two.
+        choices=['bash', 'php', 'ruby', 'python'],  # currently only these languages supported
         help="Language to be used while tranforming the provided request.")
     tranform_group.add_argument(
         '--transform_name', '-tn',
