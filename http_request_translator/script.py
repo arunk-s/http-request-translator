@@ -79,10 +79,9 @@ class PHPScript(AbstractScript):
             if var:
                 self.url = self.url.replace(md5, var)
             splits = self.url.split(var)
+            transform_url = splits[0] + "' . " + var
             if len(splits) == 2:
-                transform_url = splits[0] + "' . " + var + " . '" + splits[1]
-            else:
-                transform_url = splits[0] + "' . " + var
+                transform_url += " . '" + splits[1]
             return transform_url
 
     def _generate_begin(self):
