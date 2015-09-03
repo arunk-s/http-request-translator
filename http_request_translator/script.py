@@ -29,7 +29,6 @@ class BashScript(AbstractScript):
         """
         if 'transform' in self.details:
             self._apply_transform()
-            print(self.url)
             return self.code_begin.format(transform=self._generate_transform())
         else:
             return self.code_begin.format(transform='')
