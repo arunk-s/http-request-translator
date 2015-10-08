@@ -86,7 +86,7 @@ class PHPScript(AbstractScript):
 
     def _generate_begin(self):
         if 'transform' in self.details:
-            self.url = self._apply_transform('transform')
+            self.url = self._apply_transform('$transform')
             return self.code_begin.format(url=self.url,
                 transform=self._generate_transform()) + self._generate_headers()
         else:

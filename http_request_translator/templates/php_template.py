@@ -13,7 +13,7 @@ curl_setopt($ch, CURLOPT_VERBOSE, 1);
 $headers = array();
 """
 
-code_transform = """transform={transform_name}('{transform_content}');"""
+code_transform = """$transform={transform_name}('{transform_content}');"""
 
 
 code_header = """
