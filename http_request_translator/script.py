@@ -114,6 +114,36 @@ class PythonScript(AbstractScript):
         else:
             return self.code_begin.format(url=self.url, headers=str(self.headers), transform='')
 
+    def _generate_transform(self):
+        """Overriding original one to generate Transform code for the request
+        in a python specific way.
+
+        :return str transform_code: Code snippet having the transform setup.
+        :rtype: str
+        """
+        if 'transform' in self.details:
+            transform_name = self.details['transform'].get('transform_name', '')
+            if transform_name == "urlencode":
+                transform_name = "quote_plus"
+                transform_imports = python_template.code_urlencode
+            elif transform_name == "json_encode":
+                transform_name = "json.loads"
+                transform_imports = python_template.code_json_encode
+            elif transform_name == "json_decode":
+                transform_name = "json.dumps"
+                transform_imports = python_template.code_json_decode
+            elif transform_name == "base64_encode":
+                transform_name = "base64.encodestring"
+                transform_imports = python_template.code_base64_encode
+            elif transform_name == "base64_decode":
+                transform_name = "base64.decodestring"
+                transform_imports = python_template.code_base64_decode
+
+            return self.code_transform.format(transform_name=transform_name,transform_imports=transform_imports,
+                transform_content=self.details['transform'].get('transform_content', ''))
+        else:
+            return ''
+
 
 class RubyScript(AbstractScript):
     """Extended `AbstractScript` class for Ruby script code generation.

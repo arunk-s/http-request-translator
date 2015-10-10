@@ -23,14 +23,24 @@ def main():
     #curl_handler.setopt(curl_handler.WRITEFUNCTION, buffer.write)
 """
 
+code_urlencode = """
+    try:
+        from urllib import quote_plus
+    except ImportError:
+        from urllib.parse import quote_plus
+"""
+
+code_json_decode = code_json_encode = """
+    import json
+"""
+
+code_base64_encode = code_base64_decode = """
+    import base64
+"""
 
 code_transform = """
-    try:
-        from urllib import urlencode
-    except ImportError:
-        from urllib.parse import urlencode
-    transform={transform_name}('{transform_content}')"""
-
+    {transform_imports}
+    transform = {transform_name}('{transform_content}')"""
 
 code_proxy = """
     curl_handler.setopt(curl_handler.PROXY, '{proxy}')
